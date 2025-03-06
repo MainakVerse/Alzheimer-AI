@@ -3,7 +3,13 @@ import time
 import google.generativeai as genai
 
 def setup_page():
-    
+    """Configure page settings and styling"""
+    # Page configuration - THIS WAS MISSING
+    st.set_page_config(
+        page_title="Alzheimer's Early Detection Assistant",
+        page_icon="🧠",
+        layout="centered"
+    )
 
     # Add custom CSS for better appearance
     st.markdown("""
@@ -111,7 +117,7 @@ def display_quick_questions():
     with col1:
         if st.button("What are early signs of Alzheimer's?"):
             st.session_state.messages.append({"role": "user", "content": "What are the early signs of Alzheimer's disease?"})
-            st.rerun()
+            st.rerun()  # Note: using st.rerun() instead of st.experimental_rerun()
         if st.button("Is forgetfulness normal aging?"):
             st.session_state.messages.append({"role": "user", "content": "Is occasional forgetfulness a normal part of aging or a sign of Alzheimer's?"})
             st.rerun()
