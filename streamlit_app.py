@@ -3,7 +3,6 @@ import streamlit as st
 from config import *
 from streamlit_pages._home_page import home_page
 from streamlit_pages._predict_alzheimer import prediction_page
-from streamlit_pages._latest_news import news_page
 from streamlit_pages._chat_page import chat_bot
 
 # SETTING PAGE CONFIG
@@ -56,9 +55,7 @@ def main():
         prediction_page()
     if app_mode == "Expert AI":
         chat_bot()
-    if app_mode == "Latest News":
-        news_page()
-    
+  
 
 
 if __name__ == "__main__":
