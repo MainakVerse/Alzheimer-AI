@@ -4,12 +4,11 @@ from config import *
 from streamlit_pages._home_page import home_page
 from streamlit_pages._predict_alzheimer import prediction_page
 from streamlit_pages._latest_news import news_page
-from streamlit_pages._team_members import team_members  
 from streamlit_pages._chat_page import chat_bot
 
 # SETTING PAGE CONFIG
 st.set_page_config(
-    page_title="Alzheimer's Prediction Systems",
+    page_title="Alzheimer's AI",
     page_icon=":brain:",
 )
 
@@ -40,16 +39,13 @@ st.sidebar.image(SIDE_BANNER)
 st.sidebar.title("Alzheimer's Prediction System")
 app_mode = st.sidebar.selectbox(
     "Please navigate through the different sections of our website from here",
-    ["Home", "Predict Alzheimer's", "ChatBot", "Latest News", "Team Members"],
+    ["Home", "Predict Alzheimer's", "Expert AI", "Latest News"],
 )
 
 
 st.sidebar.write("""
 # Disclaimer
 The predictions provided by this system are for informational purposes only. Consult a healthcare professional for accurate diagnosis and advice.
-
-# Contact
-For inquiries, you can mail us [here](mailto:arpitsengar99@gmail.com).
 """)
 
 
@@ -58,12 +54,11 @@ def main():
         home_page()
     if app_mode == "Predict Alzheimer's":
         prediction_page()
-    if app_mode == "ChatBot":
+    if app_mode == "Expert AI":
         chat_bot()
     if app_mode == "Latest News":
         news_page()
-    if app_mode == "Team Members":
-        team_members()
+    
 
 
 if __name__ == "__main__":
