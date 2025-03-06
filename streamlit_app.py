@@ -38,7 +38,7 @@ st.sidebar.image(SIDE_BANNER)
 st.sidebar.title("Alzheimer's Prediction System")
 app_mode = st.sidebar.selectbox(
     "Please navigate through the different sections of our website from here",
-    ["Home", "Predict Alzheimer's", "Expert AI", "Latest News"],
+    ["Home", "Predict Alzheimer's", "Expert AI"],
 )
 
 
