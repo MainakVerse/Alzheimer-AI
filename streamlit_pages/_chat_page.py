@@ -104,25 +104,6 @@ def display_chat_history():
             st.markdown(message["content"])
     st.markdown("</div>", unsafe_allow_html=True)
 
-def display_quick_questions():
-    """Display buttons for common questions"""
-    st.subheader("Common Questions")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("What are early signs of Alzheimer's?"):
-            st.session_state.messages.append({"role": "user", "content": "What are the early signs of Alzheimer's disease?"})
-            st.rerun()  # Note: using st.rerun() instead of st.experimental_rerun()
-        if st.button("Is forgetfulness normal aging?"):
-            st.session_state.messages.append({"role": "user", "content": "Is occasional forgetfulness a normal part of aging or a sign of Alzheimer's?"})
-            st.rerun()
-
-    with col2:
-        if st.button("When should I see a doctor?"):
-            st.session_state.messages.append({"role": "user", "content": "When should someone with memory problems see a doctor?"})
-            st.rerun()
-        if st.button("How is Alzheimer's diagnosed?"):
-            st.session_state.messages.append({"role": "user", "content": "How is Alzheimer's disease diagnosed?"})
-            st.rerun()
 
 def chat_bot():
     """Main chatbot functionality"""
@@ -216,8 +197,7 @@ def chat_bot():
     st.markdown("---")
     st.markdown("© 2025 Alzheimer's Awareness Assistant | This is not a diagnostic tool | Always consult a healthcare professional")
     
-    # Display quick question buttons
-    display_quick_questions()
+ 
 
 # Main execution
 if __name__ == "__main__":
