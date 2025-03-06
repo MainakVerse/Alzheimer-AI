@@ -1,100 +1,204 @@
 import streamlit as st
+import time
 import google.generativeai as genai
-from config import BASE_PROMPT
 
-# Configure Google Gemini API using Streamlit secrets
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+# Page configuration
+st.set_page_config(
+    page_title="Alzheimer's Early Detection Assistant",
+    page_icon="🧠",
+    layout="centered"
+)
 
-# Initialize flag for first interaction
-if "first_interaction" not in st.session_state:
-    st.session_state.first_interaction = True
+# Add custom CSS for better appearance
+st.markdown("""
+<style>
+    .main-header {
+        font-size: 2.5rem;
+        color: #4527A0;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    .subheader {
+        font-size: 1.2rem;
+        color: #666;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .disclaimer {
+        background-color: #FFF8E1;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+    }
+    .chat-container {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-def chat_bot():
-    # Set page title and header
-    st.title("Alzheimer's and Memory Health Assistant")
-    st.subheader("Ask me questions about Alzheimer's disease, memory issues, and mental health")
+# Header section
+st.markdown("<h1 class='main-header'>Alzheimer's Awareness Assistant</h1>", unsafe_allow_html=True)
+st.markdown("<p class='subheader'>Ask questions about memory concerns, cognitive changes, or dementia symptoms</p>", unsafe_allow_html=True)
+
+# Medical disclaimer
+with st.expander("⚕️ Important Medical Disclaimer", expanded=True):
+    st.markdown("""
+    This tool is for informational purposes only and not a substitute for professional medical advice. 
+    If you're experiencing cognitive symptoms or are concerned about Alzheimer's disease, please consult a healthcare provider.
+    This AI assistant cannot diagnose medical conditions.
+    """)
+
+# Initialize chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Hello, I'm your Alzheimer's awareness assistant. I can provide information about memory concerns, cognitive changes, and dementia. How can I help you today?"}
+    ]
+
+# Sidebar with information
+with st.sidebar:
     
-    # Store LLM generated responses
-    if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "Hello! I'm your Alzheimer's and memory health assistant. I can answer questions about Alzheimer's disease, dementia, memory issues, and related mental health topics. How may I help you today?"}]
+    st.header("About This Tool")
+    st.write("""
+    This assistant provides information about:
+    - Early signs of Alzheimer's disease
+    - Differences between normal aging and dementia
+    - When to seek medical attention
+    - Support resources for patients and caregivers
+    - Latest research in Alzheimer's treatment
+    """)
     
-    # Initialize Gemini model
-    if "model" not in st.session_state:
-        st.session_state.model = genai.GenerativeModel('gemini-pro')
+    st.header("Common Warning Signs")
+    st.write("""
+    • Memory loss disrupting daily life
+    • Challenges in planning or problem solving
+    • Difficulty completing familiar tasks
+    • Confusion with time or place
+    • Trouble understanding visual images
+    • New problems with words or speaking
+    • Misplacing things and losing the ability to retrace steps
+    • Decreased or poor judgment
+    • Withdrawal from work or social activities
+    • Changes in mood and personality
+    """)
+
+# Configure Gemini API
+try:
+    # Get API key from environment variable
+    api_key = st.secrets["GEMINI_API_KEY"]
+    if api_key:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
+        is_configured = True
+    else:
+        # Fallback message - this will only be visible to developers, not end users
+        st.sidebar.info("Note to developer: Set the GEMINI_API_KEY environment variable")
+        is_configured = False
+        model = None
+except Exception as e:
+    st.sidebar.error(f"Error initializing AI assistant: {str(e)}")
+    is_configured = False
+    model = None
+
+# Display chat history
+st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+st.markdown("</div>", unsafe_allow_html=True)
+
+# Alzheimer's and dementia context for the model
+MEDICAL_CONTEXT = """
+You are an Alzheimer's disease awareness assistant designed to provide helpful information about memory concerns, 
+cognitive changes, and dementia symptoms. Follow these guidelines:
+
+1. IMPORTANT: You are NOT a diagnostic tool. Always clarify that only qualified healthcare professionals can 
+   diagnose Alzheimer's disease or other forms of dementia. Include this disclaimer when appropriate.
+
+2. Provide accurate, evidence-based information about:
+   - Early warning signs of Alzheimer's disease and other dementias
+   - Differences between normal aging and concerning cognitive changes
+   - When someone should seek medical attention
+   - The diagnostic process for Alzheimer's disease
+   - Current treatment approaches and research
+   - Resources for patients and caregivers
+
+3. For questions about specific symptoms:
+   - Be empathetic and informative
+   - Explain which symptoms warrant medical attention
+   - Never attempt to diagnose or rule out medical conditions
+   - When in doubt, recommend consulting a healthcare provider
+
+4. Use clear, empathetic language appropriate for the general public
+   - Avoid excessive medical jargon
+   - Be sensitive to the emotional nature of memory concerns
+
+5. If asked about a medical emergency or severe symptoms, always advise seeking immediate medical attention
+
+6. Focus your responses on information related to Alzheimer's disease, dementia, memory concerns, and brain health.
+   If asked questions outside this scope, gently redirect to your area of focus.
+
+Respond in a helpful, accurate, and compassionate manner.
+"""
+
+# Chat input
+if prompt := st.chat_input("Ask about memory concerns, Alzheimer's disease, or dementia..."):
+    # Add user message to chat
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
     
-    # Initialize Gemini chat
-    if "chat" not in st.session_state:
-        st.session_state.chat = st.session_state.model.start_chat(history=[])
-
-    # Display chat messages
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])
-
-    # Function for generating LLM response
-    def generate_response(prompt_input):
-        # Create a system prompt that focuses responses on Alzheimer's and related topics
-        if st.session_state.first_interaction:
-            # For the first interaction, include the base prompt to set context
-            system_prompt = f"{BASE_PROMPT} You are an assistant specialized in Alzheimer's disease, dementia, memory loss, cognitive decline, and related mental health issues. Only answer questions related to these topics. If asked about unrelated topics, politely redirect the conversation back to Alzheimer's disease, memory health, cognitive issues, or mental health."
-            st.session_state.first_interaction = False
-            
-            # Add the system prompt to the chat history
-            st.session_state.chat = st.session_state.model.start_chat(history=[
-                {"role": "user", "parts": [system_prompt]},
-                {"role": "model", "parts": ["I understand. I'll focus on providing helpful information about Alzheimer's disease, memory issues, cognitive health, and related mental health topics."]}
-            ])
-        
-        # Evaluate if the question is on topic
-        topic_check = st.session_state.model.generate_content(
-            f"Determine if this question is related to Alzheimer's disease, dementia, memory issues, cognitive health, or mental health: '{prompt_input}'. Answer only with 'yes' or 'no'."
-        )
-        
-        is_on_topic = "yes" in topic_check.text.lower()
-        
-        if is_on_topic:
-            # Send the prompt to Gemini and get response
-            response = st.session_state.chat.send_message(prompt_input)
-            return response.text
-        else:
-            return "I'm specialized in answering questions about Alzheimer's disease, dementia, memory issues, cognitive health, and related mental health topics. Could you please ask me something related to these areas instead?"
-
-    # User-provided prompt
-    if prompt := st.chat_input("Ask about Alzheimer's, memory issues, or mental health..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.write(prompt)
-    
-    # Generate a new response if last message is not from assistant
-    if st.session_state.messages and st.session_state.messages[-1]["role"] != "assistant":
+    # Generate AI response
+    if is_configured:
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                response = generate_response(prompt) 
-                st.write(response) 
-        message = {"role": "assistant", "content": response}
-        st.session_state.messages.append(message)
+            message_placeholder = st.empty()
+            full_response = ""
+            
+            try:
+                # Show a spinner while generating response
+                with st.spinner("Thinking..."):
+                    response = model.generate_content(MEDICAL_CONTEXT + "\n\nUser question: " + prompt)
+                
+                # Simulate typewriter effect
+                if hasattr(response, 'text'):
+                    response_text = response.text
+                    for chunk in response_text.split():
+                        full_response += chunk + " "
+                        time.sleep(0.02)  # Adjust speed as needed
+                        message_placeholder.markdown(full_response + "▌")
+                    
+                    message_placeholder.markdown(full_response)
+                    st.session_state.messages.append({"role": "assistant", "content": full_response})
+                else:
+                    message_placeholder.markdown("I apologize, but I couldn't generate a response. Please try rephrasing your question.")
+            except Exception as e:
+                message_placeholder.markdown(f"I'm sorry, I encountered an error while processing your request. Please try again later. Error details: {str(e)}")
+    else:
+        with st.chat_message("assistant"):
+            st.markdown("I apologize, but the AI assistant is currently unavailable. Please try again later.")
 
-# Main app
-def main():
-    st.set_page_config(
-        page_title="Alzheimer's Health Assistant",
-        page_icon="🧠",
-    )
-    
-    # Sidebar with info
-    with st.sidebar:
-        st.markdown("## About")
-        st.markdown("This assistant provides information about Alzheimer's disease, dementia, memory issues, and related mental health topics.")
-        st.markdown("### Topics You Can Ask About:")
-        st.markdown("- Alzheimer's disease symptoms and progression")
-        st.markdown("- Memory loss and forgetfulness")
-        st.markdown("- Dementia types and differences")
-        st.markdown("- Caregiving tips and resources")
-        st.markdown("- Latest research and treatments")
-        st.markdown("- Cognitive health and prevention")
-    
-    # Run the chatbot
-    chat_bot()
+# Footer
+st.markdown("---")
+st.markdown("© 2025 Alzheimer's Awareness Assistant | This is not a diagnostic tool | Always consult a healthcare professional")
 
-if __name__ == "__main__":
-    main()
+# Add buttons for common questions
+st.subheader("Common Questions")
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("What are early signs of Alzheimer's?"):
+        st.session_state.messages.append({"role": "user", "content": "What are the early signs of Alzheimer's disease?"})
+        st.experimental_rerun()
+    if st.button("Is forgetfulness normal aging?"):
+        st.session_state.messages.append({"role": "user", "content": "Is occasional forgetfulness a normal part of aging or a sign of Alzheimer's?"})
+        st.experimental_rerun()
+
+with col2:
+    if st.button("When should I see a doctor?"):
+        st.session_state.messages.append({"role": "user", "content": "When should someone with memory problems see a doctor?"})
+        st.experimental_rerun()
+    if st.button("How is Alzheimer's diagnosed?"):
+        st.session_state.messages.append({"role": "user", "content": "How is Alzheimer's disease diagnosed?"})
+        st.experimental_rerun()
