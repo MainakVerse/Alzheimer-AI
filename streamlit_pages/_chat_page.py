@@ -3,12 +3,6 @@ import time
 import google.generativeai as genai
 
 def setup_page():
-    # Page configuration
-    st.set_page_config(
-        page_title="Alzheimer's Early Detection Assistant",
-        page_icon="🧠",
-        layout="centered"
-    )
     
     # Add custom CSS for better appearance
     st.markdown("""
