@@ -1,16 +1,6 @@
 # Alzheimer's Disease Prediction
 ![banner](assets/images/banner.jpg)
 
-## Table of Contents
-- [Introduction](##introduction)
-- [Setup Instructions](#setup-instructions)
-  - [Prerequisites](#prerequisites)
-- [Usage Guide](#usage-guide)
-  - [Data Input](#data-input)
-- [Additional Information](#additional-information)
-  - [Model Details](#model-details)
-  - [Dataset](#dataset)
-
 ## Introduction
 Alzheimer's disease is a complex neurodegenerative disorder that affects millions of people worldwide. Early detection and prediction of Alzheimer's can lead to better management and treatment outcomes. This prediction system utilizes a machine learning model trained on a dataset of relevant features to provide predictions about the likelihood of Alzheimer's disease.
 
@@ -22,7 +12,7 @@ The purpose of this project proposal is to develop a machine learning model for 
 
 ### Potential Impact
 The potential impact of this project on the issue of Alzheimer's disease is significant:
-- Early prediction of Alzheimer's disease can lead to timely interventions, potentially slowing down the progression of the disease.
+- Early prediction of Alzheimer's disease and Dementia can lead to timely interventions, potentially slowing down the progression of the disease.
 - Accurate prediction models can aid in identifying suitable candidates for clinical trials and research studies.
 - Providing a tool for early prediction can raise awareness about Alzheimer's disease and encourage individuals to seek early medical evaluation.
 
