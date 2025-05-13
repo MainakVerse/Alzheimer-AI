@@ -109,7 +109,7 @@ def configure_ai():
         api_key = st.secrets["GEMINI_API_KEY"]
         if api_key:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-pro-latest')
+            model = genai.GenerativeModel('gemini-2.0-flash')
             is_configured = True
         else:
             # Fallback message - this will only be visible to developers, not end users
